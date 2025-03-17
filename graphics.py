@@ -38,32 +38,37 @@ def ensure_dir(f):
 	if not os.path.exists(d):
 		os.makedirs(d)
 
-LOYAL_A = Image.open("%s/loyal-army.png" % TOKENS_DIR)
-LOYAL_F = Image.open("%s/loyal-fleet.png" % TOKENS_DIR)
-LOYAL_G = Image.open("%s/loyal-garrison.png" % TOKENS_DIR)
-ELITE_A = Image.open("%s/elite-army.png" % TOKENS_DIR)
-ELITE_F = Image.open("%s/elite-fleet.png" % TOKENS_DIR)
-ELITE_G = Image.open("%s/elite-garrison.png" % TOKENS_DIR)
-DIPLOMAT = Image.open("%s/diplomat-icon.png" % TOKENS_DIR)
+def load_token(token_path, size=(200, 200)):
+	"""Load a token image, falling back to a placeholder if not found"""
+	try:
+		return Image.open(token_path)
+	except (IOError, FileNotFoundError):
+		logger.warning(f"Token not found: {token_path}, using placeholder")
+		import urllib.request
+		from io import BytesIO
+		placeholder_url = f"https://placehold.co/{size[0]}x{size[1]}/png"
+		with urllib.request.urlopen(placeholder_url) as response:
+			return Image.open(BytesIO(response.read()))
+
+# Load base tokens with placeholders
+LOYAL_A = load_token(f"{TOKENS_DIR}/loyal-army.png")
+LOYAL_F = load_token(f"{TOKENS_DIR}/loyal-fleet.png")
+LOYAL_G = load_token(f"{TOKENS_DIR}/loyal-garrison.png")
+ELITE_A = load_token(f"{TOKENS_DIR}/elite-army.png")
+ELITE_F = load_token(f"{TOKENS_DIR}/elite-fleet.png")
+ELITE_G = load_token(f"{TOKENS_DIR}/elite-garrison.png")
+DIPLOMAT = load_token(f"{TOKENS_DIR}/diplomat-icon.png")
 
 def load_unit_tokens(game):
 	tokens = dict()
 	for player in game.player_set.filter(user__isnull=False):
 		t = dict()
 		name = player.static_name
-		try:
-			t.update({'A': Image.open("%s/A-%s.png" % (TOKENS_DIR, name))})
-			t.update({'F': Image.open("%s/F-%s.png" % (TOKENS_DIR, name))})
-			t.update({'G': Image.open("%s/G-%s.png" % (TOKENS_DIR, name))})
-		except IOError:
-			logger.error("Missing unit token for %s" % name)
-			raise GraphicsError
-		tokens.update({name: t })
-	try:
-		tokens.update({'autonomous': {'G': Image.open("%s/G-autonomous.png" % TOKENS_DIR)}})
-	except IOError:
-		logger.error("Missing autonomous garrison token")
-		raise GraphicsError
+		t.update({'A': load_token(f"{TOKENS_DIR}/A-{name}.png")})
+		t.update({'F': load_token(f"{TOKENS_DIR}/F-{name}.png")})
+		t.update({'G': load_token(f"{TOKENS_DIR}/G-{name}.png")})
+		tokens.update({name: t})
+	tokens.update({'autonomous': {'G': load_token(f"{TOKENS_DIR}/G-autonomous.png")}})
 	return tokens
 
 
@@ -149,11 +154,7 @@ def make_map(game, fow=False):
 		logger.error("Base map not found for scenario %s" % game.scenario.slug)
 		raise GraphicsError
 	## if there are disabled areas, mark them
-	try:
-		marker = Image.open("%s/disabled.png" % TOKENS_DIR)
-	except IOError:
-		logger.error("Disabled token not found")
-		raise GraphicsError
+	marker = load_token(f"{TOKENS_DIR}/disabled.png")
 	for a in game.get_disabled_areas():
 		try:
 			base_map.paste(marker, (a.aftoken.x, a.aftoken.y), marker)
@@ -161,11 +162,7 @@ def make_map(game, fow=False):
 			logger.error("AFToken not found for area %s" % a.code)
 			raise GraphicsError
 	## mark special city incomes
-	try:
-		marker = Image.open("%s/chest.png" % TOKENS_DIR)
-	except IOError:
-		logger.error("Chest token not found")
-		raise GraphicsError
+	marker = load_token(f"{TOKENS_DIR}/chest.png")
 	for i in game.scenario.cityincome_set.all():
 		try:
 			base_map.paste(marker, (i.city.gtoken.x + 32, i.city.gtoken.y), marker)
@@ -176,11 +173,7 @@ def make_map(game, fow=False):
 	for player in game.player_set.filter(user__isnull=False):
 		## paste control markers
 		controls = player.gamearea_set.all()
-		try:
-			marker = Image.open("%s/control-%s.png" % (TOKENS_DIR, player.static_name))
-		except IOError:
-			logger.error("Control token not found for player %s" % player.static_name)
-			raise GraphicsError
+		marker = load_token(f"{TOKENS_DIR}/control-{player.static_name}.png")
 		for area in controls:
 			try:
 				base_map.paste(marker, (area.board_area.controltoken.x, area.board_area.controltoken.y), marker)
@@ -189,11 +182,7 @@ def make_map(game, fow=False):
 				raise GraphicsError
 		## paste flags
 		home = player.home_country()
-		try:
-			flag = Image.open("%s/flag-%s.png" % (TOKENS_DIR, player.static_name))
-		except IOError:
-			logger.error("Flag token not found for player %s" % player.static_name)
-			raise GraphicsError
+		flag = load_token(f"{TOKENS_DIR}/flag-{player.static_name}.png")
 		for game_area in home:
 			area = game_area.board_area
 			try:
@@ -203,11 +192,7 @@ def make_map(game, fow=False):
 				raise GraphicsError
 	## paste famine markers
 	if game.configuration.famine:
-		try:
-			famine = Image.open("%s/famine-marker.png" % TOKENS_DIR)
-		except IOError:
-			logger.error("Famine token not found")
-			raise GraphicsError
+		famine = load_token(f"{TOKENS_DIR}/famine-marker.png")
 		for a in game.gamearea_set.filter(famine=True):
 			try:
 				coords = (a.board_area.controltoken.x + 12, a.board_area.controltoken.y + 12)
@@ -217,11 +202,7 @@ def make_map(game, fow=False):
 			base_map.paste(famine, coords, famine)
 	## paste storm markers
 	if game.configuration.storms:
-		try:
-			storm = Image.open("%s/storm-marker.png" % TOKENS_DIR)
-		except IOError:
-			logger.error("Storm token not found")
-			raise GraphicsError
+		storm = load_token(f"{TOKENS_DIR}/storm-marker.png")
 		for a in game.gamearea_set.filter(storm=True):
 			try:
 				coords = (a.board_area.aftoken.x - 20, a.board_area.aftoken.y + 30)
@@ -231,11 +212,7 @@ def make_map(game, fow=False):
 			base_map.paste(storm, coords, storm)
 	## paste rebellion markers
 	if game.configuration.finances:
-		try:
-			rebellion_marker = Image.open("%s/rebellion-marker.png" % TOKENS_DIR)
-		except IOError:
-			logger.error("Rebellion token not found")
-			raise GraphicsError
+		rebellion_marker = load_token(f"{TOKENS_DIR}/rebellion-marker.png")
 		for r in game.get_rebellions():
 			try:
 				if r.garrisoned:
