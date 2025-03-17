@@ -88,10 +88,10 @@
 	<li>{{ game.comments_count }} {% trans "comments" %}</li>
 	<li>{% rule_icons game.configuration %}</li>
 	{% if game.private %}
-		{% ifequal game.created_by user %}
+		{% if game.created_by == user %}
 			<li><a href="{% url "invite-users" game.slug %}">{% trans "Invitations" %}</a></li>
 			<li><a href="{% url "make-public" game.slug %}">{% trans "Make public" %}</a></li>
-		{% endifequal %}
+		{% endif %}
 	{% endif %}
 	<li><a href="{% url "show-game" game.slug %}">{% trans "View game" %}</a></li>
 	{% if joinable %}

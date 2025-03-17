@@ -80,9 +80,9 @@
 <ul>
 {% for e in current_expenses %}
 <li id="expense_{{ e.id }}">{{ e }}
-{% ifequal e.confirmed 0 %}
+{% if e.confirmed == 0 %}
 (<a href="{% url "undo-expense" game.slug e.id %}">{% trans "Delete" %}</a>)
-{% endifequal %}
+{% endif %}
 </li>
 {% endfor %}
 </ul>

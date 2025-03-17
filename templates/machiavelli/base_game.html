@@ -101,9 +101,9 @@
 </li>
 {% else %}
 <li>
-		{% ifnotequal game.slots 0 %}
+		{% if game.slots != 0 %}
 			<a href="{% url "join-game" game.slug %}">{% trans "Join game" %}</a>
-		{% endifnotequal %}
+		{% endif %}
 </li>
 {% endif %}
 {% if rules %}

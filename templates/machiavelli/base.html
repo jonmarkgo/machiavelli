@@ -47,9 +47,9 @@
 <ul>
 {% for profile in top_users %}
 	<li
-	{% ifequal user.profile profile %}
+	{% if user.profile == profile %}
 	class="my_position"
-	{% endifequal %}
+	{% endif %}
 	>
 	<span>{% cycle "1" "2" "3" "4" "5" %}. </span>
 	<a href="{% url "profile_detail" username=profile.user.username %}">{% avatar profile.user 24 %}</a>

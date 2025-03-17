@@ -34,9 +34,9 @@ orders. If you want a unit to do nothing, select the "Hold" option for it.
 <ol id="sent_orders">
 {% for order in sent_orders %}
 <li id="order_{{ order.id }}">{{ order.explain }}
-{% ifequal order.confirmed 0 %}
+{% if order.confirmed == 0 %}
 (<a href="{% url "delete-order" game.slug order.id %}" class="delete_order">{% trans "Delete" %}</a>)
-{% endifequal %}
+{% endif %}
 </li>
 {% endfor %}
 </ol>
@@ -109,9 +109,9 @@ orders. If you want a unit to do nothing, select the "Hold" option for it.
 <ul>
 {% for e in current_expenses %}
 <li id="expense_{{ e.id }}">{{ e }}
-{% ifequal e.confirmed 0 %}
+{% if e.confirmed == 0 %}
 (<a href="{% url "undo-expense" game.slug e.id %}">{% trans "Delete" %}</a>)
-{% endifequal %}
+{% endif %}
 </li>
 {% endfor %}
 </ul>
@@ -139,7 +139,7 @@ orders. If you want a unit to do nothing, select the "Hold" option for it.
 
 {% endif %}
 
-{% ifequal player.done 0 %}
+{% if player.done == 0 %}
 
 <div class="action_block">
 <h2>{% trans "Confirm your actions" %}</h2>
@@ -153,7 +153,7 @@ orders. If you want a unit to do nothing, select the "Hold" option for it.
 </form>
 </div>
 
-{% endifequal %}
+{% endif %}
 
 {% endblock %}
 

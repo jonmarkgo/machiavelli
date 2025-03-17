@@ -106,10 +106,10 @@ Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
 <ul class="section_menu">
 	<li>{% rule_icons game.configuration %}</li>
 	{% if game.private and not game.started and not game.finished %}
-		{% ifequal game.created_by user %}
+		{% if game.created_by == user %}
 			<li><a href="{% url "invite-users" game.slug %}">{% trans "Invitations" %}</a></li>
 			<li><a href="{% url "make-public" game.slug %}">{% trans "Make public" %}</a></li>
-		{% endifequal %}
+		{% endif %}
 	{% endif %}
 	
 {% if not game.started and not game.finished %}

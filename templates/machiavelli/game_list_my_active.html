@@ -49,15 +49,15 @@
 	<dt>{% trans "Time left" %}</dt><dd>{{ player.game.next_phase_change|timeuntil }}</dd>
 {% else %}
 	<dd class="{{ player.get_time_status }}">
-	{% ifequal player.game.phase 1 %}
+	{% if player.game.phase == 1 %}
 		{% trans "You must adjust your units." %}
-	{% endifequal %}
-	{% ifequal player.game.phase 2 %}
+	{% endif %}
+	{% if player.game.phase == 2 %}
 		{% trans "You must give your orders." %}
-	{% endifequal %}
-	{% ifequal player.game.phase 3 %}
+	{% endif %}
+	{% if player.game.phase == 3 %}
 		{% trans "You must retreat some units." %}
-	{% endifequal %}
+	{% endif %}
 	</dd>
 	<dt>{% trans "Time to get karma" %}</dt><dd>{{ player.game.get_bonus_deadline|timeuntil }}</dd>
 	<dt>{% trans "Safe time to play" %}</dt><dd>{{ player.deadline|timeuntil }}</dd>

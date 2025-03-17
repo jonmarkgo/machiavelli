@@ -7,9 +7,9 @@
 <p>{% trans "This game is inactive or you are not playing in it." %}</p>
 {% if player %}
 {% else %}
-		{% ifnotequal game.slots 0 %}
+		{% if game.slots != 0 %}
 			<a href="{% url "join-game" game.slug %}">{% trans "Join game" %}</a>
-		{% endifnotequal %}
+		{% endif %}
 {% endif %}
 </div>
 {% endblock %}
