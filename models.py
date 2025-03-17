@@ -42,6 +42,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.template.defaultfilters import capfirst, timesince, force_escape
 from django.urls import reverse
+from django.utils import timezone
 
 # machiavelli
 from machiavelli.graphics import make_map
@@ -251,6 +252,17 @@ class Game(models.Model):
                 self.extra_conquered_cities = 6
         if not self.slug:
             slugify.unique_slugify(self, self.title)
+            
+        # Make datetime fields timezone-aware
+        if self.created and timezone.is_naive(self.created):
+            self.created = timezone.make_aware(self.created)
+        if self.started and timezone.is_naive(self.started):
+            self.started = timezone.make_aware(self.started)
+        if self.finished and timezone.is_naive(self.finished):
+            self.finished = timezone.make_aware(self.finished)
+        if self.last_phase_change and timezone.is_naive(self.last_phase_change):
+            self.last_phase_change = timezone.make_aware(self.last_phase_change)
+            
         super(Game, self).save(*args, **kwargs)
 
     ##------------------------
