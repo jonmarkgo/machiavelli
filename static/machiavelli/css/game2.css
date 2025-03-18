@@ -246,13 +246,29 @@
 
 #sent_orders {
 	padding: 1em;
-	border: 1px transparent;
+	border: 1px solid #e0ddd3;
 	border-radius: 5px;
-	background-color: #e5e7d9;
+	background-color: #fff;
+	margin: 1em 0;
+	list-style-type: decimal;
 }
 
 #sent_orders li {
-	margin-left: 1em;
-	margin-bottom: 0.5em;
-	list-style-type: decimal;
+	margin: 0.5em 0;
+	padding: 0.5em;
+	border-bottom: 1px solid #e0ddd3;
+}
+
+#sent_orders li:last-child {
+	border-bottom: none;
+}
+
+#sent_orders li a.delete_order {
+	color: #9f2727;
+	text-decoration: none;
+	margin-left: 0.5em;
+}
+
+#sent_orders li a.delete_order:hover {
+	text-decoration: underline;
 }

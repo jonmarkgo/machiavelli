@@ -980,7 +980,11 @@ class PlayOrders(GamePlayView):
         ctx = super(PlayOrders, self).get_context_data(**kwargs)
         if not self.player:
             return ctx
-        ctx.update({'sent_orders': self.player.order_set.all()})
+        sent_orders = self.player.order_set.all()
+        print("DEBUG: Found %d orders for player" % sent_orders.count())
+        for order in sent_orders:
+            print("DEBUG: Order: %s" % order.explain())
+        ctx.update({'sent_orders': sent_orders})
         if self.game.configuration.finances:
             ctx.update({'current_expenses': self.player.expense_set.all()})
         if self.game.configuration.assassinations:
@@ -991,6 +995,7 @@ class PlayOrders(GamePlayView):
                     order_by('year', 'season'),
                 'credit_limit': self.player.get_credit(),
             })
+        ctx.update({'done': self.player.done})
         return ctx
 
     def get(self, request, *args, **kwargs):
@@ -998,7 +1003,7 @@ class PlayOrders(GamePlayView):
             if not self.player.done:
                 form_class = self.get_form_class()
                 order_form = form_class(self.player)
-                return self.render_to_response(self.get_context_data(order_form=order_form))
+                return self.render_to_response(self.get_context_data(form=order_form))
         return self.render_to_response(self.get_context_data())
 
     def post(self, request, *args, **kwargs):
@@ -1020,7 +1025,7 @@ class PlayOrders(GamePlayView):
                 else:
                     new_order = order_form.save()
                     response_dict.update({
-                        'pk': new_order.pk ,
+                        'pk': new_order.pk,
                         'new_order': new_order.explain()
                     })
                 return JsonResponse(response_dict)
@@ -1028,6 +1033,9 @@ class PlayOrders(GamePlayView):
             else:
                 if order_form.is_valid():
                     new_order = order_form.save()
+                    messages.success(request, _("Order successfully saved."))
+                else:
+                    return self.render_to_response(self.get_context_data(form=order_form))
                 return HttpResponseRedirect(request.path)
         raise Http404
 

@@ -45,7 +45,7 @@
 	</div>
 	<p class="{{ player.get_time_status }}">{{ player.game.next_phase_change|timeuntil }}</span></p>
 <ul>
-	<li><a href="{% url 'game_log' player.game.slug %}">{% trans "Log" %}</a></li> 
+	<li><a href="{% url 'machiavelli:game_log' player.game.slug %}">{% trans "Log" %}</a></li> 
 	<li><a href="{% url 'condottieri_messages:inbox' %}">{% trans "Inbox" %}</a></li>
 	<li><a href="{% url 'condottieri_messages:outbox' %}">{% trans "Outbox" %}</a></li>
 </ul>

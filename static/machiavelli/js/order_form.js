@@ -97,6 +97,7 @@ function orderDeleted(data) {
 }
 
 function processOrderJson(data) {
+	console.log('Received response:', data);
 	var e_msg = '';
 	if (data) {
 		if (eval(data.bad)) {
@@ -110,6 +111,7 @@ function processOrderJson(data) {
 				}
 			}
 		} else {
+			console.log('Adding new order:', data.new_order);
 			var new_li = '<li id="order_' + data.pk + '">';
 			new_li += data.new_order;
 			new_li += ' (<a href="' + game_url + '/delete_order/';
@@ -117,6 +119,7 @@ function processOrderJson(data) {
 			new_li += '" class="delete_order">';
 			new_li += delete_text;
 			new_li += '</a>)</li>';
+			console.log('New order HTML:', new_li);
 			$(new_li).hide().appendTo("#sent_orders").fadeIn("slow");
 			addClickHandlers();
 		}
@@ -130,7 +133,10 @@ function prepareForm() {
 		url: game_url,
 		dataType: 'json',
 		success: processOrderJson,
-		beforeSubmit: beforeForm
+		beforeSubmit: beforeForm,
+		headers: {
+			'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+		}
 	};
 	$('#order_form').ajaxForm(options);
 }
@@ -149,8 +155,12 @@ function addClickHandlers() {
 }
 
 $(document).ready(function() {
+	console.log('Document ready, initializing order form...');
+	console.log('Sent orders container:', $('#sent_orders').length);
+	console.log('Sent orders container HTML:', $('#sent_orders').html());
+	console.log('Sent orders container parent:', $('#sent_orders').parent().html());
 	hideOptional();
 	prepareForm();
 	addClickHandlers();
 	addChangeHandlers();
-	});
+});
