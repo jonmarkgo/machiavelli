@@ -3,6 +3,8 @@
 {% load i18n %}
 {% load avatar_tags %}
 {% load machiavelli_tags %}
+{% load stars %}
+{% load crispy_forms_tags %}
 
 {% block head_title %}{{ game.title }}{% endblock %}
 
@@ -68,7 +70,7 @@ Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
 	<ul>
 	{% for p in game.player_set.all %}
 		{% if p.user %}
-		<li><a href="{% url 'profile_detail' username=p.user.username %}">{{ p.user.username }}</a></li>
+		<li><a href="{% url 'profiles:profile_detail' username=p.user.username %}">{{ p.user.username }}</a></li>
 		{% endif %}
 	{% endfor %}
 	</ul>
@@ -147,7 +149,7 @@ Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
 	{% if game.is_team_game %}
 	<td>{{ p.team }}</td>
 	{% endif %}
-        <td><a href="{% url 'profile_detail' username=p.user.username %}">{{ p.user }}</a></td>
+        <td><a href="{% url 'profiles:profile_detail' username=p.user.username %}">{{ p.user }}</a></td>
 	<td>{{ p.country }}</td>
 	<td class="data_c">{{ p.points }}</td>
 	<td class="data_c">{{ p.cities }}</td>
@@ -166,8 +168,8 @@ Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
 <th>{% trans "By" %}</th>
 {% for o in overthrows %}
 	<tr>
-	<td><a href="{% url 'profile_detail' username=o.government.username %}">{{ o.government.username }}</a></td>
-	<td><a href="{% url 'profile_detail' username=o.opposition.username %}">{{ o.opposition.username }}</a></td>
+	<td><a href="{% url 'profiles:profile_detail' username=o.government.username %}">{{ o.government.username }}</a></td>
+	<td><a href="{% url 'profiles:profile_detail' username=o.opposition.username %}">{{ o.opposition.username }}</a></td>
 	</tr>
 {% endfor %}
 </thead>

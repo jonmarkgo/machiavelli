@@ -432,9 +432,8 @@ class Game(models.Model):
 
     def start(self):
         """ Starts the game """
-        if not self.started is None:
-            ## the game is already started
-            return
+        self.started = timezone.now()
+        self.last_phase_change = timezone.now()
         if logging:
             logger.info("Starting game %s" % self.id)
         if self.private:
@@ -456,8 +455,6 @@ class Game(models.Model):
             self.assign_initial_income()
         if self.configuration.assassinations:
             self.create_assassins()
-        self.started = datetime.now()
-        self.last_phase_change = datetime.now()
         self.notify_players("game_started", {"game": self})
         self.save()
         try:
@@ -702,7 +699,7 @@ class Game(models.Model):
                 """
         if not self.phase == PHINACTIVE:
             limit = self.next_phase_change()
-            return limit - datetime.now()
+            return limit - timezone.now()
 
     def time_is_exceeded(self):
         """
@@ -743,7 +740,7 @@ class Game(models.Model):
 
         duration = timedelta(0, self.time_limit * BONUS_TIME)
         limit = self.last_phase_change + duration
-        to_limit = limit - datetime.now()
+        to_limit = limit - timezone.now()
         if to_limit >= timedelta(0, 0):
             return True
         else:
@@ -899,7 +896,7 @@ class Game(models.Model):
             else:
                 next_phase = PHORDERS
         self.phase = next_phase
-        self.last_phase_change = datetime.now()
+        self.last_phase_change = timezone.now()
         # self.map_changed()
         self.extended_deadline = False
         self.save()
@@ -1913,7 +1910,7 @@ class Game(models.Model):
 
     def game_over(self):
         self.phase = PHINACTIVE
-        self.finished = datetime.now()
+        self.finished = timezone.now()
         self.save()
         self.make_map(fow=False)
         if signals:
@@ -2568,7 +2565,7 @@ class Player(models.Model):
             except ObjectDoesNotExist:
                 rev = Revolution(game=self.game, government=self.user,
                                  country=self.contender.country)
-            rev.active = datetime.now()
+            rev.active = timezone.now()
             rev.voluntary = True
             rev.save()
         self.save()
@@ -2730,7 +2727,7 @@ class Player(models.Model):
                 Calculates the time to the next phase change and returns it as a
                 timedelta.
                 """
-        return self.next_phase_change() - datetime.now()
+        return self.next_phase_change() - timezone.now()
 
     def in_last_seconds(self):
         """
@@ -2742,7 +2739,7 @@ class Player(models.Model):
         """ Returns true if the player has exceeded his own time, and he is playing because
                 other players have not yet finished. """
 
-        return self.next_phase_change() < datetime.now()
+        return self.next_phase_change() < timezone.now()
 
     @property
     def undoable(self):
@@ -2752,7 +2749,7 @@ class Player(models.Model):
     def get_time_status(self):
         """ Returns a string describing the status of the player depending on the time limits.
                 This string is to be used as a css class to show the time """
-        now = datetime.now()
+        now = timezone.now()
         bonus = self.game.get_bonus_deadline()
         if now <= bonus:
             return 'bonus_time'

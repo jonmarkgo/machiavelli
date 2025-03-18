@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from django.utils import timezone
 
 import machiavelli.models as machiavelli
 from condottieri_scenarios.models import Scenario, Country
@@ -27,10 +28,12 @@ class GameBaseForm(forms.ModelForm):
     def __init__(self, user, **kwargs):
         super(GameBaseForm, self).__init__(**kwargs)
         self.instance.created_by = user
+        if not self.instance.pk:  # Only for new instances
+            self.instance.created = timezone.now()
 
     def save(self, commit=True):
         instance = super(GameBaseForm, self).save(commit=False)
-        instance.slots = instance.scenario.number_of_players - 1
+        instance.slots = max(0, instance.scenario.number_of_players - 1)
         if commit:
             instance.save()
         return instance

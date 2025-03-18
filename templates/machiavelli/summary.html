@@ -4,7 +4,7 @@
 {% load cache %}
 {% load avatar_tags %}
 {% load machiavelli_tags %}
-{% load condottieri_profiles_tags %}
+{% load stars %}
 {% load static %}
 
 {% get_current_language as LANGUAGE_CODE %}
@@ -45,9 +45,9 @@
 	</div>
 	<p class="{{ player.get_time_status }}">{{ player.game.next_phase_change|timeuntil }}</span></p>
 <ul>
-	<li><a href="{% url 'machiavelli:game_log' player.game.slug %}">{% trans "Log" %}</a></li> 
-	<li><a href="{% url 'machiavelli:condottieri_messages_inbox' player.game.slug %}">{% trans "Inbox" %}</a></li>
-	<li><a href="{% url 'machiavelli:condottieri_messages_outbox' player.game.slug %}">{% trans "Outbox" %}</a></li>
+	<li><a href="{% url 'game_log' player.game.slug %}">{% trans "Log" %}</a></li> 
+	<li><a href="{% url 'condottieri_messages:inbox' %}">{% trans "Inbox" %}</a></li>
+	<li><a href="{% url 'condottieri_messages:outbox' %}">{% trans "Outbox" %}</a></li>
 </ul>
 </div>
 	{% endfor %}

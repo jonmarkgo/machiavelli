@@ -1481,10 +1481,13 @@ def logs_by_game(request, slug=''):
     except:
         player = machiavelli.Player.objects.none()
     context = get_game_context(request, game, player)
-    #log_list = game.baseevent_set.exclude(year__exact=game.year,
-    #                                   season__exact=game.season,
-    #                                   phase__exact=game.phase)
     log_list = get_log_qs(game, player)
+    
+    # If there are no events, return an empty page instead of 404
+    if not log_list.exists():
+        context['season_log'] = None
+        return render(request, 'machiavelli/log_list.html', context)
+        
     paginator = events_paginator.SeasonPaginator(log_list)
     try:
         year = int(request.GET.get('year'))
@@ -1653,7 +1656,7 @@ class JoinGameView(LoginRequiredMixin, View):
                 request,
                 _("Define your languages and then, try again.")
             )
-            return redirect("profile_edit")
+            return redirect("profiles:profile_edit", next=request.path)
         if game.private:
             ## check if user has been invited
             try:

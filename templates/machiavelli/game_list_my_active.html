@@ -2,7 +2,7 @@
 
 {% load i18n %}
 {% load machiavelli_tags %}
-{% load condottieri_profiles_tags %}
+{% load stars %}
 
 {% block head_title %}
 {% blocktrans %}Ongoing games{% endblocktrans %}
@@ -69,7 +69,7 @@
 	<ul>
 	{% for p in player.game.player_set.all %}
 		{% if p.user %}
-		<li><a href="{% url 'profile_detail' username=p.user.username %}">{{ p.user.username }}</a></li>
+		<li><a href="{% url 'profiles:profile_detail' username=p.user.username %}">{{ p.user.username }}</a></li>
 		{% endif %}
 	{% endfor %}
 	</ul>
@@ -81,10 +81,10 @@
 <ul class="section_menu">
 	<li>{% trans "Version" %}: {{ player.game.version }}</li>
 	<li>{% rule_icons player.game.configuration %}</li>
-	<li><a href="{% url 'show_game' player.game.slug %}">{% trans "View game" %}</a></li>
-	<li><a href="{% url 'game_log' player.game.slug %}">{% trans "Log" %}</a></li> 
-	<li><a href="{% url 'condottieri_messages_inbox' player.game.slug %}">{% trans "Inbox" %}</a></li>
-	<li><a href="{% url 'condottieri_messages_outbox' player.game.slug %}">{% trans "Outbox" %}</a></li>
+	<li><a href="{% url 'machiavelli:show_game' player.game.slug %}">{% trans "View game" %}</a></li>
+	<li><a href="{% url 'machiavelli:game_log' player.game.slug %}">{% trans "Log" %}</a></li> 
+	<li><a href="{% url 'condottieri_messages:inbox' %}">{% trans "Inbox" %}</a></li>
+	<li><a href="{% url 'condottieri_messages:outbox' %}">{% trans "Outbox" %}</a></li>
 </ul>
 </div>
 {% endfor %}

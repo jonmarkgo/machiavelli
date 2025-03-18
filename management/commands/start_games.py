@@ -13,9 +13,10 @@ class Command(BaseCommand):
 
 	help = 'Starts games that have all their players and have not started.'
 	
-	def handle_noargs(self, **options):
+	def handle(self, *args, **options):
 		self.stdout.write("Starting games...\n")
-		if settings.MAINTENANCE_MODE:
+		# Check for maintenance mode if it exists, otherwise assume not in maintenance
+		if getattr(settings, 'MAINTENANCE_MODE', False):
 			logger.warning("App is in maintenance mode. Exiting.\n")
 			self.stderr.write("App is in maintenance mode. Exiting.\n")
 			return
