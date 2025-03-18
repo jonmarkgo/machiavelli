@@ -17,7 +17,7 @@ players have done it or the time limit is reached.{% endblocktrans %}</p>
 in order to keep them in play. You will pay the cost in ducats of every unit that you
 select. The units not selected won't be paid and will be disbanded.</p>{% endblocktrans %}
 
-<form action="{% url "show-game" game.slug %}" method="post">
+<form action="{% url 'machiavelli:show_game' game.slug %}" method="post">
 {% csrf_token %}
 
 <div class="action_form">

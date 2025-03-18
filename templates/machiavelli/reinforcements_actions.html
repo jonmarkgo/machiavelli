@@ -55,7 +55,7 @@ players have done it or the time limit is reached.{% endblocktrans %}</p>
 {% plural %} and {{ cur_units }} units.
 {% endblocktrans %}</p>
 
-<form action="{% url "show-game" game.slug %}" method="post">
+<form action="{% url 'machiavelli:show_game' game.slug %}" method="post">
 {% csrf_token %}
 
 {% if reinforce_form %}

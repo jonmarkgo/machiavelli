@@ -272,7 +272,7 @@ class Game(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('show-game', None, {'slug': self.slug})
+        return reverse('machiavelli:show_game', kwargs={'slug': self.slug})
 
     def _is_team_game(self):
         return self.teams > 1

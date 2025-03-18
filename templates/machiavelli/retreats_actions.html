@@ -18,7 +18,7 @@ players have done it or the time limit is reached.{% endblocktrans %}</p>
 {% endif %}
 
 {% else %}
-<form action="{% url "show-game" game.slug %}" method="post">
+<form action="{% url 'machiavelli:show_game' game.slug %}" method="post">
 {% csrf_token %}
 {% if retreat_forms %}
 <p>{% blocktrans %}

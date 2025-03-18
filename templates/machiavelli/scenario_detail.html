@@ -2,6 +2,7 @@
 
 {% load cache %}
 {% load i18n %}
+{% load static %}
 
 {% get_current_language as LANGUAGE_CODE %}
 
@@ -30,7 +31,7 @@
 {% for k, v in countries.items %}
 <tr>
 <td class="data_c">
-<img src="{{ STATIC_URL }}machiavelli/img/banner-{{ k }}.png" alt="{{ v.name }}"/>
+<img src="{% static 'machiavelli/img/banner-'|add:k|add:'.png' %}" alt="{{ v.name }}"/>
 </td>
 <td>{{ v.name }}</td>
 <td>{{ v.homes|join:", " }}</td>

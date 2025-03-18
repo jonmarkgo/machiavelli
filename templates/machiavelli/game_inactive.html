@@ -71,7 +71,7 @@ Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
 <dt>{% trans "Average karma" %}</dt><dd>{{ game.get_average_karma|karma_stars }}</dd>
 {% endif %}
 
-<dt>{% trans "Scenario" %}</dt><dd><a href="{% url "scenario_detail" game.scenario.name %}">{{ game.scenario.title }}</a></dd>
+<dt>{% trans "Scenario" %}</dt><dd><a href="{% url 'scenarios:scenario_detail' game.scenario.name %}">{{ game.scenario.title }}</a></dd>
 <dt>{% trans "Cities to win" %}</dt><dd>{{ game.cities_to_win }}</dd>
 <dt>{% trans "Time limit" %}</dt><dd>{{ game.get_time_limit_display }}</dd>
 <dt>{% trans "Creator" %}</dt><dd>{{ game.created_by.username }}</dd>
@@ -85,7 +85,7 @@ Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
 	<ul>
 	{% for p in game.player_set.all %}
 		{% if p.user %}
-		<li><a href="{% url "profile_detail" username=p.user.username %}">{{ p.user.username }}</a></li>
+		<li><a href="{% url 'profiles:profile_detail' username=p.user.username %}">{{ p.user.username }}</a></li>
 		{% endif %}
 	{% endfor %}
 	</ul>
@@ -107,16 +107,16 @@ Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
 	<li>{% rule_icons game.configuration %}</li>
 	{% if game.private and not game.started and not game.finished %}
 		{% if game.created_by == user %}
-			<li><a href="{% url "invite-users" game.slug %}">{% trans "Invitations" %}</a></li>
-			<li><a href="{% url "make-public" game.slug %}">{% trans "Make public" %}</a></li>
+			<li><a href="{% url 'machiavelli:invite_users' game.slug %}">{% trans "Invitations" %}</a></li>
+			<li><a href="{% url 'machiavelli:make_public' game.slug %}">{% trans "Make public" %}</a></li>
 		{% endif %}
 	{% endif %}
 	
 {% if not game.started and not game.finished %}
 	{% if joinable %}
-	<li><a href="{% url "join-game" game.slug %}">{% trans "Join game" %}</a></li>
+	<li><a href="{% url 'machiavelli:join_game' game.slug %}">{% trans "Join game" %}</a></li>
 	{% else %}
-	<li><a href="{% url "leave-game" game.slug %}">{% trans "Leave game" %}</a></li>
+	<li><a href="{% url 'machiavelli:leave_game' game.slug %}">{% trans "Leave game" %}</a></li>
 	{% endif %}
 {% endif %}
 
@@ -164,7 +164,7 @@ Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
 	{% if game.is_team_game %}
 	<td>{{ p.team }}</td>
 	{% endif %}
-        <td><a href="{% url "profile_detail" p.user.username %}">{{ p.user }}</a></td>
+        <td><a href="{% url 'profiles:profile_detail' username=p.user.username %}">{{ p.user }}</a></td>
 	<td>{{ p.country }}</td>
 	<td class="data_c">{{ p.points }}</td>
 	<td class="data_c">{{ p.cities }}</td>
@@ -183,8 +183,8 @@ Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
 <th>{% trans "By" %}</th>
 {% for o in overthrows %}
 	<tr>
-	<td><a href="{% url "profile_detail" username=o.government.username %}">{{ o.government.username }}</a></td>
-	<td><a href="{% url "profile_detail" username=o.opposition.username %}">{{ o.opposition.username }}</a></td>
+	<td><a href="{% url 'profiles:profile_detail' username=o.government.username %}">{{ o.government.username }}</a></td>
+	<td><a href="{% url 'profiles:profile_detail' username=o.opposition.username %}">{{ o.opposition.username }}</a></td>
 	</tr>
 {% endfor %}
 </thead>
@@ -193,7 +193,7 @@ Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
 
 
 {% if show_log %}
-<p><a href="{% url "game-log" game.slug %}">{% trans "Campaign log" %}</a></p>
+<p><a href="{% url 'machiavelli:game_log' game.slug %}">{% trans "Campaign log" %}</a></p>
 {% endif %}
 
 {% if map %}

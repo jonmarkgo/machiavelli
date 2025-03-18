@@ -1,3 +1,5 @@
+{% load static %}
+
 {% for icon in icons %}
-<img src="{{ STATIC_URL }}machiavelli/img/{{ icon }}-icon-16.png" title="{{ icon }}" />
+<img src="{% static 'machiavelli/img/'|add:icon|add:'-icon-16.png' %}" title="{{ icon }}" />
 {% endfor %}

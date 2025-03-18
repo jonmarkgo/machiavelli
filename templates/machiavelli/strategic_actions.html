@@ -25,7 +25,7 @@ restrictions are applied:{% endblocktrans %}</p>
 
 {% if formset %}
 <div class="action_form">
-<form action="{% url "show-game" game.slug %}" method="post" class="uniForm">
+<form action="{% url 'machiavelli:show_game' game.slug %}" method="post" class="uniForm">
 {% csrf_token %}
 {{ formset.management_form }}
 {{ formset.non_form_errors }}

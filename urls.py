@@ -5,6 +5,8 @@ from django.conf import settings
 
 import machiavelli.views as views
 
+app_name = 'machiavelli'
+
 # Help context
 help_context = {
 	'contact_email': getattr(settings, 'CONTACT_EMAIL', ''),

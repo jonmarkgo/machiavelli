@@ -1,148 +1,233 @@
-{% extends "base.html" %}
+{% extends "machiavelli/base.html" %}
 
 {% load i18n %}
+{% load avatar_tags %}
 {% load machiavelli_tags %}
 
-{% block head_title %}
-{% if player %}
-	{% if player.done %}
-		[&bull;]
-	{% else %}
-		[ ]
-	{% endif %}
-{% endif %}
- {{ game.title }}
-{% endblock %}
+{% block head_title %}{{ game.title }}{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{{ STATIC_URL }}machiavelli/css/game2.css" />
-<link rel="stylesheet" href="{{ STATIC_URL }}machiavelli/css/logs.css" />
-{% block country_styles %}
 <style type="text/css">
-
-{% for p in player_list %}
-#countries .{{ p.static_name }} {
-	background: #{{ p.contender.country.color }};
-	color: black;
+#map {
+	position: relative;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 740px;
 }
-.log_list li span.{{ p.static_name }} {
-	background-image: url('{{ MEDIA_URL }}scenarios/badges/icon-{{ p.static_name }}.png');
-}
-{% endfor %}
-
 </style>
 {% endblock %}
-{% block extra_extra_head %}{% endblock %}
-{% endblock %}
 
-{% block subnav %}
-<ul>
-<li><a href="{% url "home" %}">{% trans "Home" %}</a></li>
-<li><a href="{% url "new-game" %}">{% trans "New game" %}</a></li>
-<li><a href="{% url "games-joinable" %}">{% trans "Join game" %}</a></li> 
-{% if user.is_authenticated %}
-<li><a href="{% url "games-my-active" %}">{% trans "Active games" %}</a></li>
-<li><a href="{% url "games-pending" %}">{% trans "Pending games" %}</a></li>
-<li><a href="{% url "games-my-finished" %}">{% trans "Finished games" %}</a></li>
-{% else %}
-<li><a href="{% url "games-other-active" %}">{% trans "Active games" %}</a></li>
-<li><a href="{% url "games-all-finished" %}">{% trans "Finished games" %}</a></li>
-{% endif %}
-</ul>
-{% endblock %}
+{% block left_column %}
+<h1>{{ game.title }}</h1>
 
-{% block body %}
-<div id="game_info">
-<ul>
-
-<li id="cities_to_win">
-{% if game.is_team_game %}
-30*
-{% else %}
-{{ game.cities_to_win }}
-{% endif %}
-</li>
-
-{% if player.contender.country %}
-<li id="player_badge">
-<img src="{{ MEDIA_URL }}scenarios/badges/badge-{{ player.static_name }}.png" />
-</li>
-{% endif %}
-
-<li title="{{ game.title }}">{{ game.slug }}</li>
-<li>{{ game.year|default_if_none:"" }} |
-{{ game.get_season_display|default_if_none:"" }} |
-{{ game.get_phase_display }}</li>
-<li>
-{% if player and game.slots == 0 %}
-	{% if time_exceeded %}
-	<span id="time_remaining" style="color: red">
-	{{ game.next_phase_change|timeuntil }} 
+<div class="game_info {% if game.fast %}fast{% endif %}">
+<h2><span><a href="{{ game.get_absolute_url }}">{{ game.title }}</a></span>
+{% if not game.started %}
+	<span>
+		({% trans "Slots" %}: {{ game.slots }})
 	</span>
+	{% if game.private %}
+	<span>{% trans "Private" %}</span>
+	{% endif %}
+	{% if game.is_team_game %}
+	<span>{% trans "Team game" %}</span>
+	{% endif %}
+{% endif %}
+	</h2>
+
+<div class="map">
+<img src="{{ game.thumbnail_url }}" />
+</div>
+
+{% if game.finished %}
+<div class="time">
+{% blocktrans with game.finished|date:"SHORT_DATE_FORMAT" as finished and game.finished|timeuntil:game.started as time %}
+Finished on {{ finished }} after {{ time }}.{% endblocktrans %}
+</div>
+{% endif %}
+
+<dl>
+
+{% if not game.started and not game.finished %}
+<dt>{% trans "Average score" %}</dt><dd>{{ game.get_average_score|score_stars }}</dd>
+<dt>{% trans "Average karma" %}</dt><dd>{{ game.get_average_karma|karma_stars }}</dd>
+{% endif %}
+
+<dt>{% trans "Scenario" %}</dt><dd><a href="{% url 'scenarios:scenario_detail' game.scenario.name %}">{{ game.scenario.title }}</a></dd>
+<dt>{% trans "Cities to win" %}</dt><dd>{{ game.cities_to_win }}</dd>
+<dt>{% trans "Time limit" %}</dt><dd>{{ game.get_time_limit_display }}</dd>
+<dt>{% trans "Creator" %}</dt><dd>{{ game.created_by.username }}</dd>
+
+{% if not game.started %}
+
+<dt>{% trans "Visible players?" %}</dt>
+<dd>{{ game.visible|yesno }}</dd>
+<dt>{% trans "Players" %}</dt>
+<dd>
+	<ul>
+	{% for p in game.player_set.all %}
+		{% if p.user %}
+		<li><a href="{% url 'profile_detail' username=p.user.username %}">{{ p.user.username }}</a></li>
+		{% endif %}
+	{% endfor %}
+	</ul>
+</dd>
+{% if game.private %}
+<dt>{% trans "Invited users" %}</dt>
+<dd>{{ game.invitation_set.all|join:", " }}</dd>
+{% endif %}
+
+{% endif %}
+
+
+{% if game.comment %}
+<dt>{% trans "Comment" %}</dt>
+<dd>{{ game.comment }}</dd>
+{% endif %}
+</dl>
+<ul class="section_menu">
+	<li>{% rule_icons game.configuration %}</li>
+	{% if game.private and not game.started and not game.finished %}
+		{% if game.created_by == user %}
+			<li><a href="{% url 'invite_users' game.slug %}">{% trans "Invitations" %}</a></li>
+			<li><a href="{% url 'make_public' game.slug %}">{% trans "Make public" %}</a></li>
+		{% endif %}
+	{% endif %}
+	
+{% if not game.started and not game.finished %}
+	{% if joinable %}
+	<li><a href="{% url 'join_game' game.slug %}">{% trans "Join game" %}</a></li>
 	{% else %}
-	<span id="time_remaining" style="color: Green">
-	{{ player.next_phase_change|timeuntil }}
-	</span>
+	<li><a href="{% url 'leave_game' game.slug %}">{% trans "Leave game" %}</a></li>
 	{% endif %}
-{% else %}
-	<span id="time_remaining"> 
-	{{ game.next_phase_change|timeuntil }}
-	</span>
-{% endif %}
-</li>
-{% if player %}
-<li>
-	{% if player.contender.country %}
-		{{ player.contender.country }}
-		{% if game.is_team_game %}
-		({% trans "Team" %} {{ player.team.pk }})
-		{% endif %}
-	{% endif %}
-</li>
-{% else %}
-<li>
-		{% if game.slots != 0 %}
-			<a href="{% url "join-game" game.slug %}">{% trans "Join game" %}</a>
-		{% endif %}
-</li>
-{% endif %}
-{% if rules %}
-<li>
-{% rule_icons game.configuration %}
-</li>
 {% endif %}
 
-{% if player %}
-<li id="ducats" title="{% trans "Treasury" %}">{{ player.ducats }}</li>
-{% endif %}
-
-{% if player %}
-{% if game.is_team_game %}
-<li><a href="{% url "team_messages" game.slug %}"><img src="{{ STATIC_URL }}condottieri_messages/img/inbox-icon.png" title="{% trans "Team messages" %}" /></a></li>
-{% else %}
-	{% if game.configuration.letters %}
-	<li class="mailbox_button">
-		{% if player.unread_count > 0 %}
-		<a href="{% url "condottieri_messages_inbox" game.slug %}"><img src="{{ STATIC_URL }}condottieri_messages/img/unread-icon.png" title="{% trans "You have new mail" %} ({{ player.unread_count }})" /></a>
-		{% else %}
-		<a href="{% url "condottieri_messages_inbox" game.slug %}"><img src="{{ STATIC_URL }}condottieri_messages/img/inbox-icon.png" title="{% trans "Inbox" %}" /></a>
-		{% endif %}
-	</li>
-	<li class="mailbox_button">
-		<a href="{% url "condottieri_messages_outbox" game.slug %}"><img src="{{ STATIC_URL }}condottieri_messages/img/outbox-icon.png" title="{% trans "Outbox" %}" /></a>
-	</li>
-	{% endif %}
-{% endif %}
-{% endif %}
 </ul>
 </div>
 
-<section id="game_body">
-{% block game_body %}{% endblock %}
-</section>
+{% if game.finished %}
 
-<aside id="game_sidebar">
-{% block game_sidebar %}{% endblock %}
-<aside/>
+<h2>{% trans "Results of game" %} "{{ game.title }}"</h2>
+
+{% if game.is_team_game %}
+<p>{% blocktrans %}These are the results for each team{% endblocktrans %}</p>
+
+<table>
+	<thead>
+	<tr>
+	<th>{% trans "Team" %}</th>
+	<th>{% trans "Cities" %}</th>
+	</thead>
+	{% for t in game.team_set.all %}
+	<tr>
+	<td>{{ t }}</td>
+	<td>{{ t.cities_count }}</td>
+	</tr>
+	{% endfor %}
+</table>
+{% endif %}
+
+<p>{% blocktrans %}These are the scores for each player in the game{% endblocktrans %}</p>
+
+<table>
+	<thead>
+	<tr>
+	{% if game.is_team_game %}
+	<th>{% trans "Team" %}</th>
+	{% endif %}
+	<th>{% trans "Player" %}</th>
+	<th>{% trans "Country" %}</th>
+	<th>{% trans "Score" %}</th>
+	<th>{% trans "Cities" %}</th>
+	</tr>
+	</thead>
+	{% for p in players %}
+	<tr>
+	{% if game.is_team_game %}
+	<td>{{ p.team }}</td>
+	{% endif %}
+        <td><a href="{% url 'profile_detail' username=p.user.username %}">{{ p.user }}</a></td>
+	<td>{{ p.country }}</td>
+	<td class="data_c">{{ p.points }}</td>
+	<td class="data_c">{{ p.cities }}</td>
+	</tr>
+	{% endfor %}
+
+</table>
+
+{% if overthrows %}
+<h2>{% trans "Overthrows" %}</h2>
+<p>{% blocktrans %}This is the history of overthrows in this game.{% endblocktrans %}</p>
+
+<table>
+<thead>
+<tr><th>{% trans "Overthrown player" %}</th>
+<th>{% trans "By" %}</th>
+{% for o in overthrows %}
+	<tr>
+	<td><a href="{% url 'profile_detail' username=o.government.username %}">{{ o.government.username }}</a></td>
+	<td><a href="{% url 'profile_detail' username=o.opposition.username %}">{{ o.opposition.username }}</a></td>
+	</tr>
+{% endfor %}
+</thead>
+</table>
+{% endif %}
+
+
+{% if show_log %}
+<p><a href="{% url 'game_log' game.slug %}">{% trans "Campaign log" %}</a></p>
+{% endif %}
+
+{% if map %}
+<div id="map" class="viewer"></div>
+{% endif %}
+
+{% endif %}
+
+<h2>{% trans "Comments" %}</h2>
+
+{% if comments %}
+
+<div id="game_comment_list">
+{% for c in comments %}
+	<div class="game_comment {% if c.after_game %}after_game{% endif %}">{{ c.comment|linebreaks }}
+	<div>
+	<div class="comment_info">
+	{% avatar c.user 24 %}
+		{% blocktrans with c.submit_date|timesince as time and c.user as user %}{{ time }} ago by {{ user }}
+		{% endblocktrans %}
+	</div>
+	</div>
+	</div>
+{% endfor %}
+</div>
+
+{% endif %}
+
+{% if user.is_authenticated and not game.paused %}
+<form action="" method="POST" class="uniForm">
+{% csrf_token %}
+{{ form|crispy }}
+<input type="submit" value="{% trans "Send" %}" />
+</form>
+{% endif %}
+
+{% endblock %}
+
+{% block right_column_extra %}
+<div style="text-align: center">
+<div class="g-plus" data-action="share" data-annotation="bubble" data-height="24"></div>
+</div>
+
+<script type="text/javascript">
+window.___gcfg = {lang: "{{LANGUAGE_CODE}}", parsetags: 'onload'};
+
+	(function() {
+		var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+		po.src = 'https://apis.google.com/js/plusone.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+	})();
+</script>
 
 {% endblock %}

@@ -7,9 +7,22 @@
 <p>{% trans "This game is inactive or you are not playing in it." %}</p>
 {% if player %}
 {% else %}
-		{% if game.slots != 0 %}
-			<a href="{% url "join-game" game.slug %}">{% trans "Join game" %}</a>
-		{% endif %}
+<ul class="section_menu">
+{% if game.private and not game.started and not game.finished %}
+	{% if game.created_by == user %}
+		<li><a href="{% url 'invite_users' game.slug %}">{% trans "Invitations" %}</a></li>
+		<li><a href="{% url 'make_public' game.slug %}">{% trans "Make public" %}</a></li>
+	{% endif %}
+{% endif %}
+
+{% if not game.started and not game.finished %}
+	{% if joinable %}
+	<li><a href="{% url 'join_game' game.slug %}">{% trans "Join game" %}</a></li>
+	{% else %}
+	<li><a href="{% url 'leave_game' game.slug %}">{% trans "Leave game" %}</a></li>
+	{% endif %}
+{% endif %}
+</ul>
 {% endif %}
 </div>
 {% endblock %}

@@ -17,7 +17,7 @@ orders. If you want a unit to do nothing, select the "Hold" option for it.
 <p>{% blocktrans %}If you compose an order that break the rules, you should see an error and you will have to fix the order. However, if you compose an impossible order, this unit will hold, instead of carrying out its order. Be careful.{% endblocktrans %}</p>
 {% if order_form %}
 <div class="action_form">
-<form action="{% url "show-game" game.slug %}" method="post" id="order_form">
+<form action="{% url 'machiavelli:show_game' game.slug %}" method="post" id="order_form">
 {% csrf_token %}
 <div id="emsg">&nbsp;</div>
 <fieldset>
@@ -160,7 +160,7 @@ orders. If you want a unit to do nothing, select the "Hold" option for it.
 {% block extra_game %}
 {% if order_form %}
 <script>
-	var game_url = "{% url "show-game" game.slug %}";
+	var game_url = "{% url 'machiavelli:show_game' game.slug %}";
 	var delete_text = "{% trans "Delete" %}";
 </script>
 	{{ order_form.media }}

@@ -35,7 +35,7 @@ def activity(request):
 			context['joinable_counter'] = machiavelli.Game.objects.joinable(user).exclude(private=True).count()
 		else:	
 			context['joinable_counter'] = machiavelli.Game.objects.joinable().exclude(private=True).count()
-		cache.set(cache_key, context)
+		cache.set(cache_key, context, 300)
 	return context
 
 def latest_gossip(request):

@@ -204,9 +204,9 @@ class OtherActiveGamesList(GameListView):
         games = cache.get(cache_key)
         if not games:
             if user_id is None:
-                games = machiavelli.LiveGame.objects.all()
+                games = machiavelli.Game.objects.in_progress()
             else:
-                games = machiavelli.LiveGame.objects.exclude(
+                games = machiavelli.Game.objects.in_progress().exclude(
                     player__user=self.request.user
                 )
             cache.set(cache_key, games)
@@ -1550,9 +1550,9 @@ class CreateGameView(LoginRequiredMixin, SidebarMixin, TemplateView):
             player_joined.send(sender=new_player)
             messages.success(request, _("Game successfully created."))
             if new_game.private:
-                return redirect('invite-users', slug=new_game.slug)
+                return redirect('machiavelli:invite_users', slug=new_game.slug)
             else:
-                return redirect(new_game)
+                return redirect('machiavelli:show_game', slug=new_game.slug)
         return self.render_to_response(
             self.get_context_data(
                 game_form=game_form,
@@ -1641,7 +1641,7 @@ class JoinGameView(LoginRequiredMixin, View):
             pass
         else:
             messages.error(request, _("You had already joined this game."))
-            return redirect('summary')
+            return redirect('machiavelli:summary')
         invitation = None
         ## check if the user has defined his languages
         if not request.user.profile.has_languages():
@@ -1663,11 +1663,11 @@ class JoinGameView(LoginRequiredMixin, View):
                     request,
                     _("This game is private and you have not been invited.")
                 )
-                return redirect("games-joinable")
+                return redirect("machiavelli:games_joinable")
         msg = request.user.profile.check_karma_to_join(fast=game.fast)
         if msg != "": #user can't join
             messages.error(request, msg)
-            return redirect("summary")
+            return redirect("machiavelli:summary")
         new_player = machiavelli.Player(user=request.user, game=game)
         new_player.save()
         if invitation:
@@ -1676,7 +1676,7 @@ class JoinGameView(LoginRequiredMixin, View):
         player_joined.send(sender=new_player)
         messages.success(request, _("You have successfully joined the game."))
         cache.delete('sidebar_activity')
-        return redirect(game)
+        return redirect('machiavelli:show_game', slug=game.slug)
 
 class LeaveGameView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -1696,7 +1696,7 @@ class LeaveGameView(LoginRequiredMixin, View):
             if game.player_set.count() == 0:
                 game.delete()
                 messages.info(request, _("The game has been deleted."))
-        return redirect('summary')
+        return redirect('machiavelli:summary')
 
 class MakeGamePublic(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -1729,11 +1729,11 @@ class OverthrowView(LoginRequiredMixin, View):
                     err = _("You need a minimum karma of %s to join a game.") % \
                         settings.KARMA_TO_JOIN
                     messages.error(request, err)
-                    return redirect("revolution_list")
+                    return redirect("machiavelli:revolution_list")
                 if not revolution.active:
                     err = _("This revolution is inactive.")
                     messages.error(request, err)
-                    return redirect("revolution_list")
+                    return redirect("machiavelli:revolution_list")
                 revolution.opposition = request.user
                 revolution.save()
                 if revolution.voluntary:
@@ -1750,7 +1750,7 @@ class OverthrowView(LoginRequiredMixin, View):
                 )
         else:
             messages.error(request, _("You are already playing this game."))
-        return redirect("revolution_list")
+        return redirect("machiavelli:revolution_list")
 
 class UndoOverthrowView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -1763,10 +1763,10 @@ class UndoOverthrowView(LoginRequiredMixin, View):
         revolution.opposition = None
         revolution.save()
         messages.success(request, _("You have withdrawn from this revolution."))
-        return redirect("revolution_list")
+        return redirect("machiavelli:revolution_list")
 
 class HallOfFameView(SidebarMixin, ListView):
-    allow_empty = False
+    allow_empty = True
     model = CondottieriProfile
     paginate_by = 10
     context_object_name = 'profiles_list'
